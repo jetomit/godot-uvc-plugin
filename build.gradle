@@ -1,0 +1,44 @@
+apply plugin: 'com.android.library'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:4.0.0'
+    }
+}
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.3"
+
+    repositories {
+        google()
+        jcenter()
+    }
+
+    defaultConfig {
+        minSdkVersion 18
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+    }
+
+    // Used to customize the name of generated AAR file.
+    libraryVariants.all { variant ->
+        variant.outputs.all { output ->
+            output.outputFileName = "Uvc.${variant.name}.aar"
+        }
+    }
+
+    externalNativeBuild {
+        cmake { path 'CMakeLists.txt' }
+    }
+}
+
+dependencies {
+    compileOnly fileTree(dir: 'libs', include: ['godot-lib*.aar'])
+}

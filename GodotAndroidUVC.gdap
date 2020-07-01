@@ -1,0 +1,5 @@
+[config]
+
+name="Uvc"
+binary_type="local"
+binary="Uvc.release.aar"
