@@ -21,6 +21,9 @@ public class UvcPlugin extends GodotPlugin {
 		super(godot);
 		System.loadLibrary("godot_uvc");
 
+		boolean ret = init();
+		Log.i("godot/usb", "usb init returned " + Boolean.toString(ret));
+
 		usbDevices = new HashMap<Integer, UsbDeviceConnection>();
 
 		Activity activity = getActivity();
@@ -29,6 +32,13 @@ public class UvcPlugin extends GodotPlugin {
 		filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
 		filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
 		activity.registerReceiver(usbReceiver, filter);
+	}
+
+	@Override
+	public void onMainDestroy() {
+		super.onMainDestroy();
+		finish();
+		Log.i("godot/usb", "called native finish()");
 	}
 
 	@Override
@@ -120,6 +130,8 @@ public class UvcPlugin extends GodotPlugin {
 
 	public native int foo();
 
+	public native boolean init();
+	public native void finish();
 	public native boolean attached(int fd);
 	public native void detached(int fd);
 
