@@ -12,4 +12,11 @@ extern "C" {
 JNIEXPORT jint JNICALL JNI_METHOD(foo)(JNIEnv* env, jobject object) {
 	return 42;
 }
+
+JNIEXPORT jboolean JNICALL JNI_METHOD(attached)(JNIEnv* env, jobject object, jint fd) {
+	return false;
+}
+
+JNIEXPORT void JNICALL JNI_METHOD(detached)(JNIEnv* env, jobject object, jint fd) {
+}
 };
