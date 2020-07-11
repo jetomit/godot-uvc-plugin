@@ -10,19 +10,22 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
+import android.view.View;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.godotengine.godot.Godot;
 import org.godotengine.godot.plugin.GodotPlugin;
+import org.godotengine.godot.plugin.SignalInfo;
 
 public class UvcPlugin extends GodotPlugin {
 	public UvcPlugin(Godot godot) {
 		super(godot);
-		System.loadLibrary("godot_uvc");
-
-		boolean ret = init();
-		Log.i("godot/usb", "usb init returned " + Boolean.toString(ret));
+		//System.loadLibrary("godot_uvc");
 
 		usbDevices = new HashMap<Integer, UsbDeviceConnection>();
 
@@ -31,14 +34,9 @@ public class UvcPlugin extends GodotPlugin {
 		IntentFilter filter = new IntentFilter("com.android.example.USB_PERMISSION");
 		filter.addAction(UsbManager.ACTION_USB_DEVICE_ATTACHED);
 		filter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
-		activity.registerReceiver(usbReceiver, filter);
-	}
 
-	@Override
-	public void onMainDestroy() {
-		super.onMainDestroy();
-		finish();
-		Log.i("godot/usb", "called native finish()");
+		Log.i("godot/usb", "registerReceiver");
+		activity.registerReceiver(usbReceiver, filter);
 	}
 
 	@Override
@@ -51,10 +49,23 @@ public class UvcPlugin extends GodotPlugin {
 		return Collections.singletonList("helloWorld");
 	}
 
-	public String helloWorld() {
-		return Integer.toString(foo());
+	@Override
+	public Set<SignalInfo> getPluginSignals() {
+		return new HashSet<SignalInfo>(Arrays.asList(connected, disconnected));
 	}
 
+	@Override
+	public Set<String> getPluginGDNativeLibrariesPaths() {
+		return Collections.singleton("godot/plugin/v1/Uvc/guvc.gdnlib");
+	}
+
+	public String helloWorld() {
+		Log.i("godot/usb", "calling hello… ");
+		//emitSignal("camera_connected", new Integer(42));
+		return Integer.toString(43);
+	}
+
+	// XXX this gets called twice on ATTACHED/PERMISSION, why?
 	// https://stackoverflow.com/questions/15957509/compile-and-link-against-libusb-for-android
 	// https://stackoverflow.com/questions/22197425/low-level-usb-api-on-android
 	private final BroadcastReceiver usbReceiver =
@@ -66,7 +77,7 @@ public class UvcPlugin extends GodotPlugin {
 				if (action.equals(UsbManager.ACTION_USB_DEVICE_ATTACHED)) {
 					UsbDevice device =
 						(UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-					//synchronized (this) {
+					synchronized (this) {
 					if (device != null) {
 						String name = device.getDeviceName();
 						if (usbManager.hasPermission(device)) {
@@ -79,7 +90,7 @@ public class UvcPlugin extends GodotPlugin {
 							usbManager.requestPermission(device, permissionIntent);
 						}
 					}
-					//}
+					}
 
 				} else if (action.equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
 					UsbDevice device =
@@ -92,7 +103,8 @@ public class UvcPlugin extends GodotPlugin {
 						if (connection != null) {
 							int fd = connection.getFileDescriptor();
 							usbDevices.remove(device.getDeviceId());
-							detached(fd);
+							//detached(fd);
+							emitSignal("disconnected", new Integer(fd));
 						}
 					}
 					//}
@@ -121,20 +133,22 @@ public class UvcPlugin extends GodotPlugin {
 					usbDevices.put(device.getDeviceId(), connection);
 					final int fd = connection.getFileDescriptor();
 					Log.i("godot/usb", "Connected to device " + name + ", fd=" + Integer.toString(fd));
-					attached(fd);
+					//attached(fd);
+					emitSignal("connected", new Integer(fd));
+					Log.i("godot/usb", "Emitted signal for device " + name + ", fd=" + Integer.toString(fd));
 				} else {
 					Log.e("godot/usb", "Could not connect to device " + name);
 				}
 			}
 		};
 
-	public native int foo();
+//	public native boolean init();
+//	public native void finish();
+//	public native boolean attached(int fd);
+//	public native void detached(int fd);
 
-	public native boolean init();
-	public native void finish();
-	public native boolean attached(int fd);
-	public native void detached(int fd);
-
+	private SignalInfo connected = new SignalInfo("connected", Integer.class);
+	private SignalInfo disconnected = new SignalInfo("disconnected", Integer.class);
 	private UsbManager usbManager;
 	private HashMap<Integer, UsbDeviceConnection> usbDevices;
 }

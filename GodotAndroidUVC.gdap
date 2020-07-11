@@ -2,4 +2,4 @@
 
 name="Uvc"
 binary_type="local"
-binary="Uvc.release.aar"
+binary="Uvc.debug.aar"

@@ -1,6 +1,29 @@
 cmake_minimum_required(VERSION 3.6)
 
+set(CMAKE_CXX_STANDARD 14)
+
 project(godot_uvc)
+
+# godot-cpp
+file(GLOB_RECURSE GODOT_CPP_SOURCES libs/godot-cpp/src/*.cpp**)
+file(GLOB_RECURSE GODOT_CPP_HEADERS libs/godot-cpp/include/*.hpp**)
+
+add_library(godot-cpp STATIC ${GODOT_CPP_SOURCES} ${GODOT_CPP_HEADERS})
+
+target_include_directories(godot-cpp PUBLIC
+        libs/godot-cpp/include
+        libs/godot-cpp/include/core
+        libs/godot-cpp/include/gen
+)
+
+# Put godot headers as SYSTEM PUBLIC to exclude warnings from irrelevant headers
+target_include_directories(godot-cpp SYSTEM PUBLIC libs/godot-cpp/godot_headers)
+
+set(GODOT_LINKER_FLAGS "-Wl")
+set(GODOT_COMPILE_FLAGS "-fPIC -g -Wwrite-strings")
+
+set_property(TARGET godot-cpp APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
+set_property(TARGET godot-cpp APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})
 
 # libusb
 add_library(usb SHARED
@@ -33,8 +56,27 @@ target_link_libraries(uvc usb)
 include_directories(libs/libusb/libusb)
 include_directories(libs/libuvc/include)
 
+# plugin: gdscript
+add_library(guvc SHARED
+	src/gdscript/simple.cpp)
+#	src/gdscript/gdlibrary.cpp
+#	src/gdscript/guvc.cpp
+#	src/gdscript/guvc.h)
+target_include_directories(guvc PUBLIC
+        libs/godot-cpp/include
+        libs/godot-cpp/include/core
+        libs/godot-cpp/include/gen
+)
+set_property(TARGET guvc APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
+target_include_directories(guvc SYSTEM PUBLIC libs/godot-cpp/godot_headers)
+target_link_libraries(guvc godot-cpp usb uvc)
+
+# plugin: JNI part
 file(GLOB_RECURSE SOURCES src/main/cpp/*.cpp**)
 file(GLOB_RECURSE HEADERS src/main/cpp/*.h**)
 
 add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT_NAME} usb uvc)
+target_link_libraries(${PROJECT_NAME} godot-cpp usb uvc)
+
+set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
+set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})

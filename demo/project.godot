@@ -19,6 +19,15 @@ config/name="Hello World Plugin Demo"
 run/main_scene="res://Main.tscn"
 config/icon="res://icon.png"
 
+[debug]
+
+settings/stdout/verbose_stdout=true
+gdscript/warnings/exclude_addons=false
+
+[gdnative]
+
+singletons=[  ]
+
 [rendering]
 
 quality/driver/driver_name="GLES2"
