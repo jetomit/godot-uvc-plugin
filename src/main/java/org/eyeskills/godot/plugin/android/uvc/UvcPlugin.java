@@ -56,7 +56,7 @@ public class UvcPlugin extends GodotPlugin {
 
 	@Override
 	public Set<String> getPluginGDNativeLibrariesPaths() {
-		return Collections.singleton("godot/plugin/v1/Uvc/guvc.gdnlib");
+		return Collections.singleton("godot/plugin/v1/Uvc/uvc-server.gdnlib");
 	}
 
 	public String helloWorld() {

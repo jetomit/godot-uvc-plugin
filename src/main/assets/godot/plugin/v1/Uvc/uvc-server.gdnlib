@@ -1,0 +1,11 @@
+[general]
+
+singleton=true
+load_once=true
+symbol_prefix="godot_"
+reloadable=false
+
+[entry]
+
+Android.armeabi-v7a="res://assets/godot/plugin/v1/Uvc/libs/armeabi-v7a/libuvc-server.so"
+Android.arm64-v8a="res://assets/godot/plugin/v1/Uvc/libs/arm64-v8a/libuvc-server.so"

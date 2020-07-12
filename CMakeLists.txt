@@ -57,19 +57,15 @@ include_directories(libs/libusb/libusb)
 include_directories(libs/libuvc/include)
 
 # plugin: gdscript
-add_library(guvc SHARED
-	src/gdscript/simple.cpp)
-#	src/gdscript/gdlibrary.cpp
-#	src/gdscript/guvc.cpp
-#	src/gdscript/guvc.h)
-target_include_directories(guvc PUBLIC
+add_library(uvc-server SHARED src/gdscript/uvc-server.cpp)
+target_include_directories(uvc-server PUBLIC
         libs/godot-cpp/include
         libs/godot-cpp/include/core
         libs/godot-cpp/include/gen
 )
-set_property(TARGET guvc APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
-target_include_directories(guvc SYSTEM PUBLIC libs/godot-cpp/godot_headers)
-target_link_libraries(guvc godot-cpp usb uvc)
+set_property(TARGET uvc-server APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
+target_include_directories(uvc-server SYSTEM PUBLIC libs/godot-cpp/godot_headers)
+target_link_libraries(uvc-server godot-cpp usb uvc)
 
 # plugin: JNI part
 file(GLOB_RECURSE SOURCES src/main/cpp/*.cpp**)
