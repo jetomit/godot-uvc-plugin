@@ -1,7 +1,5 @@
-build/
 .cxx/
-*.apk
-
 .gradle/
-gradle
-gradlew
+build/
+*.apk
+*.jar

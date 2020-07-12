@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.6)
 
 set(CMAKE_CXX_STANDARD 14)
 
-project(godot_uvc)
+project(uvc-server)
 
 # godot-cpp
 file(GLOB_RECURSE GODOT_CPP_SOURCES libs/godot-cpp/src/*.cpp**)
@@ -38,6 +38,7 @@ add_library(usb SHARED
 	libs/libusb/libusb/os/threads_posix.c
 	libs/libusb/libusb/os/linux_netlink.c
 )
+target_include_directories(usb SYSTEM PUBLIC libs/libusb/libusb)
 target_link_libraries(usb log)
 
 # libuvc
@@ -51,28 +52,20 @@ add_library(uvc SHARED
 	libs/libuvc/src/stream.c
 	libs/libuvc/src/misc.c
 )
+target_include_directories(uvc SYSTEM PUBLIC libs/libusb/libusb libs/libuvc/include)
 target_link_libraries(uvc usb)
 
-include_directories(libs/libusb/libusb)
-include_directories(libs/libuvc/include)
+# gdscript
+add_library(${PROJECT_NAME} SHARED src/gdnative/uvc-server.cpp)
+target_link_libraries(${PROJECT_NAME} godot-cpp usb uvc)
 
-# plugin: gdscript
-add_library(uvc-server SHARED src/gdscript/uvc-server.cpp)
-target_include_directories(uvc-server PUBLIC
+target_include_directories(${PROJECT_NAME} PUBLIC
         libs/godot-cpp/include
         libs/godot-cpp/include/core
         libs/godot-cpp/include/gen
 )
-set_property(TARGET uvc-server APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
-target_include_directories(uvc-server SYSTEM PUBLIC libs/godot-cpp/godot_headers)
-target_link_libraries(uvc-server godot-cpp usb uvc)
-
-# plugin: JNI part
-file(GLOB_RECURSE SOURCES src/main/cpp/*.cpp**)
-file(GLOB_RECURSE HEADERS src/main/cpp/*.h**)
-
-add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
-target_link_libraries(${PROJECT_NAME} godot-cpp usb uvc)
+target_include_directories(${PROJECT_NAME} SYSTEM PUBLIC libs/godot-cpp/godot_headers)
+target_include_directories(${PROJECT_NAME} PUBLIC libs/libusb/libusb libs/libuvc/include)
 
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY COMPILE_FLAGS ${GODOT_COMPILE_FLAGS})
 set_property(TARGET ${PROJECT_NAME} APPEND_STRING PROPERTY LINK_FLAGS ${GODOT_LINKER_FLAGS})

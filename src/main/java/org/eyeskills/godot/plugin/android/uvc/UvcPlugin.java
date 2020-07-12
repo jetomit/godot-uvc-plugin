@@ -25,7 +25,6 @@ import org.godotengine.godot.plugin.SignalInfo;
 public class UvcPlugin extends GodotPlugin {
 	public UvcPlugin(Godot godot) {
 		super(godot);
-		//System.loadLibrary("godot_uvc");
 
 		usbDevices = new HashMap<Integer, UsbDeviceConnection>();
 
@@ -45,11 +44,6 @@ public class UvcPlugin extends GodotPlugin {
 	}
 
 	@Override
-	public List<String> getPluginMethods() {
-		return Collections.singletonList("helloWorld");
-	}
-
-	@Override
 	public Set<SignalInfo> getPluginSignals() {
 		return new HashSet<SignalInfo>(Arrays.asList(connected, disconnected));
 	}
@@ -57,12 +51,6 @@ public class UvcPlugin extends GodotPlugin {
 	@Override
 	public Set<String> getPluginGDNativeLibrariesPaths() {
 		return Collections.singleton("godot/plugin/v1/Uvc/uvc-server.gdnlib");
-	}
-
-	public String helloWorld() {
-		Log.i("godot/usb", "calling hello… ");
-		//emitSignal("camera_connected", new Integer(42));
-		return Integer.toString(43);
 	}
 
 	// XXX this gets called twice on ATTACHED/PERMISSION, why?
@@ -95,7 +83,7 @@ public class UvcPlugin extends GodotPlugin {
 				} else if (action.equals(UsbManager.ACTION_USB_DEVICE_DETACHED)) {
 					UsbDevice device =
 						(UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-					//synchronized (this) {
+					synchronized (this) {
 					if (device != null) {
 						String name = device.getDeviceName();
 						Log.i("godot/usb", "Detached usb device " + name + "(id=" + Integer.toString(device.getDeviceId()) + ")");
@@ -103,14 +91,13 @@ public class UvcPlugin extends GodotPlugin {
 						if (connection != null) {
 							int fd = connection.getFileDescriptor();
 							usbDevices.remove(device.getDeviceId());
-							//detached(fd);
 							emitSignal("disconnected", new Integer(fd));
 						}
 					}
-					//}
+					}
 
 				} else if (action.equals("com.android.example.USB_PERMISSION")) {
-					//synchronized (this) {
+					synchronized (this) {
 					UsbDevice device =
 						(UsbDevice)intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
 					if (device != null) {
@@ -120,7 +107,7 @@ public class UvcPlugin extends GodotPlugin {
 							Log.i("godot/usb", "permission denied for device " + device.getDeviceName());
 						}
 					}
-					//}
+					}
 				}
 			}
 
@@ -133,7 +120,6 @@ public class UvcPlugin extends GodotPlugin {
 					usbDevices.put(device.getDeviceId(), connection);
 					final int fd = connection.getFileDescriptor();
 					Log.i("godot/usb", "Connected to device " + name + ", fd=" + Integer.toString(fd));
-					//attached(fd);
 					emitSignal("connected", new Integer(fd));
 					Log.i("godot/usb", "Emitted signal for device " + name + ", fd=" + Integer.toString(fd));
 				} else {
@@ -142,13 +128,9 @@ public class UvcPlugin extends GodotPlugin {
 			}
 		};
 
-//	public native boolean init();
-//	public native void finish();
-//	public native boolean attached(int fd);
-//	public native void detached(int fd);
-
 	private SignalInfo connected = new SignalInfo("connected", Integer.class);
 	private SignalInfo disconnected = new SignalInfo("disconnected", Integer.class);
+
 	private UsbManager usbManager;
 	private HashMap<Integer, UsbDeviceConnection> usbDevices;
 }
