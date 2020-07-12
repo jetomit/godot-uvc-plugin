@@ -1,0 +1,12 @@
+[submodule "libs/libusb"]
+	path = libs/libusb
+	url = https://github.com/eyeskills/libusb
+	branch = android-fixes
+[submodule "libs/libuvc"]
+	path = libs/libuvc
+	url = https://github.com/eyeskills/libuvc
+	branch = android-fixes
+[submodule "libs/godot-cpp"]
+	path = libs/godot-cpp
+	url = https://github.com/godotengine/godot-cpp
+	branch = 3.2
