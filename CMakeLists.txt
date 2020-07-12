@@ -56,7 +56,11 @@ target_include_directories(uvc SYSTEM PUBLIC libs/libusb/libusb libs/libuvc/incl
 target_link_libraries(uvc usb)
 
 # gdscript
-add_library(${PROJECT_NAME} SHARED src/gdnative/uvc-server.cpp)
+add_library(${PROJECT_NAME} SHARED
+	src/gdnative/uvc-server.cpp
+	src/gdnative/uvc-feed.cpp
+	src/gdnative/gdlibrary.cpp)
+#target_include_directories(${PROJECT_NAME} PUBLIC src/gdnative)
 target_link_libraries(${PROJECT_NAME} godot-cpp usb uvc)
 
 target_include_directories(${PROJECT_NAME} PUBLIC
