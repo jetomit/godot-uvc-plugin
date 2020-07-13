@@ -10,12 +10,10 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbDeviceConnection;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
-import android.view.View;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.godotengine.godot.Godot;
@@ -53,7 +51,19 @@ public class UvcPlugin extends GodotPlugin {
 		return Collections.singleton("godot/plugin/v1/Uvc/uvc-server.gdnlib");
 	}
 
-	// XXX this gets called twice on ATTACHED/PERMISSION, why?
+	@Override
+	public void onGodotMainLoopStarted() {
+		// request permission for any attached USB devices
+		HashMap<String, UsbDevice> devices = usbManager.getDeviceList();
+		Log.i("godot/usb", "Connected usb devices are: " + devices.size());
+		for (final UsbDevice device : devices.values()) {
+			Log.i("godot/usb", "Request permission for usb device: " + device.getDeviceName());
+			PendingIntent permissionIntent = PendingIntent.getBroadcast(
+				getActivity(), 0, new Intent("com.android.example.USB_PERMISSION"), 0);
+			usbManager.requestPermission(device, permissionIntent);
+		}
+	}
+
 	// https://stackoverflow.com/questions/15957509/compile-and-link-against-libusb-for-android
 	// https://stackoverflow.com/questions/22197425/low-level-usb-api-on-android
 	private final BroadcastReceiver usbReceiver =
@@ -73,8 +83,8 @@ public class UvcPlugin extends GodotPlugin {
 							connect(device);
 						} else {
 							Log.i("godot/usb", "Requesting permission for usb device: " + name);
-							PendingIntent permissionIntent =
-								PendingIntent.getBroadcast(getActivity(), 0, new Intent("com.android.example.USB_PERMISSION"), 0);
+							PendingIntent permissionIntent = PendingIntent.getBroadcast(
+								getActivity(), 0, new Intent("com.android.example.USB_PERMISSION"), 0);
 							usbManager.requestPermission(device, permissionIntent);
 						}
 					}
