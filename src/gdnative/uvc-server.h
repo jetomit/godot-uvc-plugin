@@ -8,8 +8,8 @@ class UvcServer : public godot::Reference {
 	GODOT_CLASS(UvcServer, Reference);
 public:
 	void _init();
-	void connected(godot::Variant fd);
-	void disconnected(godot::Variant fd);
+	void connected(int fd, godot::String name);
+	void disconnected(int fd);
 
 	static void _register_methods() {
 		register_method("connected", &UvcServer::connected);

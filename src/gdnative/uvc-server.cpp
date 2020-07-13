@@ -23,23 +23,21 @@ void UvcServer::_init() {
 	uvc->connect("disconnected", this, "disconnected");
 }
 
-void UvcServer::connected(Variant v_fd) {
-	int fd = int(v_fd);
+void UvcServer::connected(int fd, String name) {
 	Godot::print(String{"UvcServer::connected("} + String::num_int64(fd) + String{")"});
 
-	disconnected(v_fd); // this is probably not necessary
+	disconnected(fd); // this is probably not necessary
 
 	auto *camera_server = Object::cast_to<CameraServer>(
 		Engine::get_singleton()->get_singleton("CameraServer"));
 	ERR_FAIL_COND(!camera_server);
 
-	auto feed = Ref<CameraFeed>(CameraFeedUvc::create(fd, "XYZZY"));
+	auto feed = Ref<CameraFeed>(CameraFeedUvc::create(fd, name));
 	feeds.insert({fd, feed});
 	camera_server->add_feed(feed);
 }
 
-void UvcServer::disconnected(Variant v_fd) {
-	int fd = int(v_fd);
+void UvcServer::disconnected(int fd) {
 	Godot::print(String{"UvcServer::disconnected("} + String::num_int64(fd) + String{")"});
 
 	auto *camera_server = Object::cast_to<CameraServer>(

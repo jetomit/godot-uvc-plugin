@@ -101,7 +101,7 @@ public class UvcPlugin extends GodotPlugin {
 						if (connection != null) {
 							int fd = connection.getFileDescriptor();
 							usbDevices.remove(device.getDeviceId());
-							emitSignal("disconnected", new Integer(fd));
+							emitSignal("disconnected", fd);
 						}
 					}
 					}
@@ -130,7 +130,7 @@ public class UvcPlugin extends GodotPlugin {
 					usbDevices.put(device.getDeviceId(), connection);
 					final int fd = connection.getFileDescriptor();
 					Log.i("godot/usb", "Connected to device " + name + ", fd=" + Integer.toString(fd));
-					emitSignal("connected", new Integer(fd));
+					emitSignal("connected", fd, name);
 					Log.i("godot/usb", "Emitted signal for device " + name + ", fd=" + Integer.toString(fd));
 				} else {
 					Log.e("godot/usb", "Could not connect to device " + name);
@@ -138,7 +138,7 @@ public class UvcPlugin extends GodotPlugin {
 			}
 		};
 
-	private SignalInfo connected = new SignalInfo("connected", Integer.class);
+	private SignalInfo connected = new SignalInfo("connected", Integer.class, String.class);
 	private SignalInfo disconnected = new SignalInfo("disconnected", Integer.class);
 
 	private UsbManager usbManager;
