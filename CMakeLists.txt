@@ -34,11 +34,11 @@ add_library(usb SHARED
 	libs/libusb/libusb/sync.c
 	libs/libusb/libusb/strerror.c
 	libs/libusb/libusb/os/linux_usbfs.c
-	libs/libusb/libusb/os/poll_posix.c
+	libs/libusb/libusb/os/events_posix.c
 	libs/libusb/libusb/os/threads_posix.c
 	libs/libusb/libusb/os/linux_netlink.c
 )
-target_include_directories(usb SYSTEM PUBLIC libs/libusb/libusb)
+target_include_directories(usb SYSTEM PUBLIC libs/libusb/libusb libs/libusb/android)
 target_link_libraries(usb log)
 
 # libuvc

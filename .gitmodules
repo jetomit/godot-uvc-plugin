@@ -1,7 +1,7 @@
 [submodule "libs/libusb"]
 	path = libs/libusb
-	url = https://github.com/eyeskills/libusb
-	branch = android-fixes
+	url = https://github.com/libusb/libusb
+	branch = master
 [submodule "libs/libuvc"]
 	path = libs/libuvc
 	url = https://github.com/eyeskills/libuvc

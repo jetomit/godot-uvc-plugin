@@ -9,7 +9,6 @@
 
 using namespace godot;
 
-static libusb_context* usb_ctx{nullptr};
 static uvc_context* uvc_ctx{nullptr};
 
 static const char* libuvc_error_name (int e) {
@@ -59,14 +58,12 @@ void CameraFeedUvc::deactivate_feed() {
 CameraFeedUvc* CameraFeedUvc::create(int fd, String name) {
 	Godot::print(String{"CameraFeedUvc::create() fd="} + String::num_int64(fd));
 
-	if (!usb_ctx && libusb_init(&usb_ctx))
-		return nullptr;
-	if (!uvc_ctx && uvc_init(&uvc_ctx, usb_ctx))
+	if (!uvc_ctx && uvc_init(&uvc_ctx, nullptr))
 		return nullptr;
 
 	// Set up device handle.
 	libusb_device_handle* usb_devh;
-	int status = libusb_wrap_sys_device(usb_ctx, (intptr_t)fd, &usb_devh);
+	int status = libusb_wrap_sys_device(uvc_ctx->usb_ctx, (intptr_t)fd, &usb_devh);
 	if (status != 0) {
 		Godot::print(String{"libusb_wrap_sys_device(): "} + String{libusb_error_name(status)});
 		return nullptr;
