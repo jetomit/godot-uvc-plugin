@@ -5,7 +5,7 @@
 [submodule "libs/libuvc"]
 	path = libs/libuvc
 	url = https://github.com/eyeskills/libuvc
-	branch = android-fixes
+	branch = android
 [submodule "libs/godot-cpp"]
 	path = libs/godot-cpp
 	url = https://github.com/godotengine/godot-cpp
