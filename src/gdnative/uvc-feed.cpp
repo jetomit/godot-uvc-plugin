@@ -3,9 +3,10 @@
 #include <cstdlib>
 
 #include <libusb.h>
+#include <libuvc/libuvc.h>
 #include <libuvc/libuvc_internal.h>
 
-#include <Defs.hpp>
+#include <Image.hpp>
 
 using namespace godot;
 
@@ -19,20 +20,14 @@ void CameraFeedUvc::_init() {
 	Godot::print("CameraFeedUvc::_init()");
 }
 
-// XXX without copying this from CameraFeed, base class
-// (de)activate_feed methods get called even for CameraFeedUvc
-void CameraFeedUvc::set_active(bool is_active) {
-	Godot::print("CameraFeedUvc::set_active()");
-	if (is_active != active) {
-		if (is_active) {
-			if (activate_feed()) {
-				Godot::print("Activate ");
-				active = true;
-			}
+void CameraFeedUvc::set_active(bool p_active) {
+	if (p_active != CameraFeed::is_active()) {
+		if (p_active) {
+			if (activate_feed())
+				CameraFeed::set_active(true);
 		} else {
 			deactivate_feed();
-			Godot::print("Deactivate ");
-			active = false;
+			CameraFeed::set_active(false);
 		}
 	}
 }
@@ -84,8 +79,8 @@ CameraFeedUvc* CameraFeedUvc::create(int fd, String name) {
 	uvc_print_diag(uvc_devh, NULL);
 
 	// Select a stream profile.
-	struct uvc_stream_ctrl* stream_ctrl =
-		(struct uvc_stream_ctrl*)malloc(sizeof(struct uvc_stream_ctrl));
+	uvc_stream_ctrl_t* stream_ctrl =
+		(uvc_stream_ctrl_t*)malloc(sizeof(uvc_stream_ctrl_t));
 	status = uvc_get_stream_ctrl_format_size(
 			uvc_devh, stream_ctrl, /* result stored in ctrl */
 			UVC_FRAME_FORMAT_ANY,
@@ -119,37 +114,34 @@ void CameraFeedUvc::destroy(Ref<CameraFeedUvc> feed) {
 // quick processing you need, or have it put the frame into your
 // application's input queue. If this function takes too long, you'll
 // start losing frames.
-void CameraFeedUvc::uvc_callback(struct uvc_frame* frame, void* userptr) {
+void CameraFeedUvc::uvc_callback(uvc_frame_t* frame, void* userptr) {
 	Godot::print("CameraFeedUvc::uvc_callback()");
 	auto feed = reinterpret_cast<CameraFeedUvc*>(userptr);
 
-	/*
-	   uvc_frame_t *bgr;
-	   uvc_error_t ret;
-	   Ref<Image> p_rgb_img;
-	   PoolByteArray img_data;
-	   img_data.resize(3 * frame->width * frame->height);
-	   PoolByteArray::Write w = img_data.write();
 	// We'll convert the image from YUV/JPEG to BGR, so allocate space
-	bgr = uvc_allocate_frame(frame->width * frame->height * 3);
+	uvc_frame_t* bgr = uvc_allocate_frame(3 * frame->width*frame->height);
 	if (!bgr) {
-	LOGI("unable to allocate bgr frame!");
-	return;
+		Godot::print("unable to allocate bgr frame!");
+		return;
 	}
 
 	// Do the BGR conversion
-	ret = uvc_any2bgr(frame, bgr);
+	uvc_error_t ret = uvc_any2bgr(frame, bgr);
 	if (ret) {
-	uvc_perror(ret, "uvc_any2bgr");
-	uvc_free_frame(bgr);
-	return;
+		uvc_perror(ret, "uvc_any2bgr");
+		uvc_free_frame(bgr);
+		return;
 	}
-	memcpy(w.ptr(), bgr, 3 * frame->width * frame->height);
 
-	p_rgb_img.instance();
-	p_rgb_img->create(frame->width, frame->height, 0, Image::FORMAT_RGB8, img_data);
-	set_RGB_img(p_rgb_img);
+	godot::PoolByteArray img_data;
+	img_data.resize(3 * frame->width*frame->height);
+	godot::PoolByteArray::Write w = img_data.write();
+	memcpy(w.ptr(), bgr->data, 3 * frame->width*frame->height);
+
+	godot::Ref<godot::Image> img_rgb;
+	img_rgb.instance();
+	img_rgb->create_from_data(frame->width, frame->height, 0, Image::FORMAT_RGB8, img_data);
+	feed->_set_RGB_img(img_rgb);
 
 	uvc_free_frame(bgr);
-	*/
 }

@@ -12,8 +12,6 @@ class CameraFeedUvc : public godot::CameraFeed {
 public:
 	void _init();
 
-	// XXX without copying this from CameraFeed, base class
-	// (de)activate_feed methods get called even for CameraFeedUvc
 	void set_active(bool p_is_active);
 
 	bool activate_feed();
@@ -32,8 +30,6 @@ private:
 	int fd;
 	uvc_device_handle* uvc_devh;
 	struct uvc_stream_ctrl* stream_ctrl;
-
-	bool active;
 	static void uvc_callback(struct uvc_frame* frame, void* userptr);
 };
 
