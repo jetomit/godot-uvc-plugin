@@ -12,17 +12,12 @@ class CameraFeedUvc : public godot::CameraFeed {
 public:
 	void _init();
 
-	void set_active(bool p_is_active);
-
-	bool activate_feed();
-	void deactivate_feed();
+	void set_active(bool active);
 
 	static CameraFeedUvc* create(int fd, godot::String name);
 	static void destroy(godot::Ref<CameraFeedUvc> feed);
 
 	static void _register_methods() {
-		register_method("activate_feed", &CameraFeedUvc::activate_feed);
-		register_method("deactivate_feed", &CameraFeedUvc::deactivate_feed);
 		register_method("set_active", &CameraFeedUvc::set_active);
 	};
 

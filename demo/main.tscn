@@ -71,7 +71,7 @@ transform = Transform( 0.88365, 0, 0.468149, 0, 1, 0, -0.468149, 0, 0.88365, -0.
 mesh = SubResource( 6 )
 material/0 = null
 
-[node name="Button" type="Button" parent="."]
+[node name="BtnPlay" type="Button" parent="."]
 margin_top = 207.0
 margin_right = 201.0
 margin_bottom = 283.0
@@ -79,5 +79,15 @@ text = "Play"
 __meta__ = {
 "_edit_use_anchors_": false
 }
+
+[node name="BtnStop" type="Button" parent="."]
+margin_top = 303.0
+margin_right = 201.0
+margin_bottom = 379.0
+text = "Play"
+__meta__ = {
+"_edit_use_anchors_": false
+}
 [connection signal="item_selected" from="CameraFeeds" to="." method="_on_CameraFeeds_item_selected"]
-[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
+[connection signal="pressed" from="BtnPlay" to="." method="play"]
+[connection signal="pressed" from="BtnStop" to="." method="stop"]

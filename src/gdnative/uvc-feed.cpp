@@ -20,35 +20,26 @@ void CameraFeedUvc::_init() {
 	Godot::print("CameraFeedUvc::_init()");
 }
 
-void CameraFeedUvc::set_active(bool p_active) {
-	if (p_active != CameraFeed::is_active()) {
-		if (p_active) {
-			if (activate_feed())
-				CameraFeed::set_active(true);
-		} else {
-			deactivate_feed();
-			CameraFeed::set_active(false);
-		}
-	}
-}
-
-bool CameraFeedUvc::activate_feed() {
-	Godot::print("CameraFeedUvc::activate_feed()");
+void CameraFeedUvc::set_active(bool active) {
+	if (active == CameraFeed::is_active())
+		return;
 	if (fd < 0) {
 		Godot::print("fd < 0, bailing!");
-		return false;
+		return;
 	}
-	int status = uvc_start_streaming(uvc_devh, stream_ctrl, uvc_callback, this, 0);
-	if (status != 0) {
-		Godot::print(String{"uvc_start_streaming: "} + String{libuvc_error_name(status)});
-		return false;
-	}
-	return true;
-}
 
-void CameraFeedUvc::deactivate_feed() {
-	Godot::print("CameraFeedUvc::deactivate_feed()");
-};
+	if (active) {
+		int ret = uvc_start_streaming(uvc_devh, stream_ctrl, uvc_callback, this, 0);
+		if (ret != 0) {
+			Godot::print(String{"uvc_start_streaming: "} +
+					String{libuvc_error_name(ret)});
+			return;
+		}
+	} else {
+		uvc_stop_streaming(uvc_devh);
+	}
+	CameraFeed::set_active(active);
+}
 
 CameraFeedUvc* CameraFeedUvc::create(int fd, String name) {
 	Godot::print(String{"CameraFeedUvc::create() fd="} + String::num_int64(fd));

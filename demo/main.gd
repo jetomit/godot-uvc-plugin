@@ -85,8 +85,9 @@ func _process(delta):
 	if (Input.is_key_pressed(KEY_ESCAPE)):
 		get_tree().quit()
 
-
-
-func _on_Button_pressed():
+func play():
 	current_camera_feed.set_active(true);
-	
+
+func stop():
+	current_camera_feed.set_active(false);
+
