@@ -44,8 +44,13 @@ void CameraFeedUvc::set_active(bool active) {
 CameraFeedUvc* CameraFeedUvc::create(int fd, String name) {
 	Godot::print(String{"CameraFeedUvc::create() fd="} + String::num_int64(fd));
 
-	if (!uvc_ctx && uvc_init(&uvc_ctx, nullptr))
-		return nullptr;
+	if (!uvc_ctx) {
+		uvc_error_t status = uvc_init(&uvc_ctx, nullptr);
+		if (status < 0) {
+			Godot::print(String{"uvc_init(): "} + String{uvc_strerror(status)});
+			return nullptr;
+		}
+	}
 
 	// Set up device handle.
 	libusb_device_handle* usb_devh;

@@ -32,7 +32,10 @@ void UvcServer::connected(int fd, String name) {
 		Engine::get_singleton()->get_singleton("CameraServer"));
 	ERR_FAIL_COND(!camera_server);
 
-	auto feed = Ref<CameraFeed>(CameraFeedUvc::create(fd, name));
+	auto feed_uvc = CameraFeedUvc::create(fd, name);
+	ERR_FAIL_COND(!feed_uvc);
+
+	auto feed = Ref<CameraFeed>(feed_uvc);
 	feeds.insert({fd, feed});
 	camera_server->add_feed(feed);
 }
